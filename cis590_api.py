@@ -1,3 +1,4 @@
+import requests
 import numpy as np
 
 from flask import Flask, request, jsonify
@@ -19,7 +20,7 @@ def process_image():
 
 
 @app.route("/standalone/recognize", methods=["POST"])
-def recognize_from_image():
+def standalone_recognition():
     # Get the image from the request
     img = request.files['image']
 
@@ -35,16 +36,29 @@ def recognize_from_image():
     return jsonify({'msg': 'success', 'response': result})
 
 
-@app.route("/oblique/recognize", methods=["POST"])
-def recognize_from_image_encodings():
-    # Get the image encodings from the request and convert the list format to numpy arrays
-    face_encodings = [np.array(arr_list) for arr_list in request.json['face_encodings']]
+@app.route("/hybrid/edge", methods=["POST"])
+def hybrid_recognition_edge():
+    # Get the image from the request
+    img = request.files['image']
 
-    # Run the face recognition
-    result = run_recognition(face_encodings)
+    # Read the image and convert to array
+    img_array = convert_img_to_array(img)
 
+    # Get the face encodings from the image array
+    face_encodings = get_encodings(img_array)
+
+    # Convert the numpy arrays to python lists
+    face_encodings_list = [arr.tolist() for arr in face_encodings]
+
+    # Send a post request to the specific API endpoint with encodings data
+    result = requests.post("http://127.0.0.1:5001/hybrid/cloud", json={"face_encodings": face_encodings_list}).json()
+
+    if result['msg'] == 'success':
+        result = result['response']
+
+    # Send results to requesting device
     return jsonify({'msg': 'success', 'response': result})
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, port=5000)

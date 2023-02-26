@@ -4,13 +4,13 @@ from face_recog import convert_img_to_array, get_encodings
 
 # constant API endpoints
 standalone_api_endpoint = 'http://127.0.0.1:5000/standalone/recognize'
-oblique_api_endpoint = 'http://127.0.0.1:5000/oblique/recognize'
+oblique_api_endpoint = 'http://127.0.0.1:5000/hybrid/edge'
 
 
-def test_standalone_recognition():
+def test_recognition():
     filename ='President_Barack_Obama.jpg'
     my_img = {'image': open(filename, 'rb')}
-    r = requests.post(standalone_api_endpoint, files=my_img)
+    r = requests.post(oblique_api_endpoint, files=my_img)
 
     # convert server response into JSON format.
     print(r.json())
@@ -39,5 +39,4 @@ def test_oblique_recognition():
 
 
 if __name__ == "__main__":
-    # test_standalone_recognition
-    test_oblique_recognition()
+    test_recognition()
